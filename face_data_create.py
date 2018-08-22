@@ -1,24 +1,21 @@
-import numpy as np 
-import cv2
+from PIL import Image
+import face_recognition
+import picamera
+import numpy as np
 import openpyxl
 
 
 wb_name = ''
-res = input('是否创建一个新的签到表：(yes/no)')
+res = input('Do you want to create a new excel file?(yes/no)')
 if 'yes' == res.lower():
     wb = openpyxl.Workbook()
     ws = wb.active
     num = 0
 else:
-    wb_name = input('请输入已有的excel文件名：')
+    wb_name = input('Please Enter the name of the excel file:')
     wb = openpyxl.load_workbook(wb_name + '.xlsx')
     ws = wb.active
     num = 1
-
-face_cascade = cv2.CascadeClassifier('/home/xzt/OpenCV-Python-Series/src/cascades/data/haarcascade_frontalface_alt.xml')
-
-cap = cv2.VideoCapture(0)
-
 
 value_list = []
 
@@ -29,22 +26,32 @@ for cells in ws['A']:
 if ID not in value_list:
     cell = ws.cell(row=num, column=1, value=ID)
 
+camera = picamera.PiCamera()
+camera.resolution = (320, 240)
+output = np.empty((240, 320, 3), dtype=np.uint8)
+
 while(ID):
-    ret, frame = cap.read()
-    gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)
-    for (x, y, w, h) in faces:
-        roi_gray = gray[y:y+h, x:x+w]
-        img_item = ID + ".png"
-        cv2.imwrite('./images/' + img_item, roi_gray) 
-        print('get!')
-       
-    cv2.imshow('frame',frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-cap.release()
-cv2.destroyAllWindows()
+    print("Capturing image.")
+    # Grab a single frame of video from the RPi camera as a numpy array
+    camera.capture(output, format="rgb")
+    face_locations = face_recognition.face_locations(output, number_of_times_to_upsample=0, model="cnn")
+
+
+    for face_location in face_locations:
+
+        # Print the location of each face in this image
+        top, right, bottom, left = face_location
+        
+
+        # You can access the actual face itself like this:
+        face_image = image[top:bottom, left:right]
+        pil_image = Image.fromarray(face_image)
+        g_pil_image = pil_image.convert('L')
+        with open('./images' + ID + '.png', 'wb') as f:
+            f.write(g_pil_image)
+        print('Image Get!!!')
+        ID = False
 if not wb_name:
-    wb_name = input('请输入表格名称:')
+    wb_name = input('Please Enter the name of the excel file:')
 wb.save('./workbooks/' + wb_name + '.xlsx')
-print('Finish!!!')
+print("Finish!!!")
