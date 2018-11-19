@@ -1,0 +1,3 @@
+16370 pts/0    S+     0:00 /bin/sh /home/xzt/facetest/exe_now.sh
+16494 pts/0    S+     0:00 sh -c ps a | grep exe_now.sh > /home/xzt/facetest/Window/kill2.txt
+16496 pts/0    S+     0:00 grep exe_now.sh

@@ -1,0 +1,3 @@
+16371 pts/0    Sl+    0:00 python3 /home/xzt/facetest/Window/exe_now.py
+16491 pts/0    S+     0:00 sh -c ps a | grep exe_now.py > /home/xzt/facetest/Window/kill.txt
+16493 pts/0    S+     0:00 grep exe_now.py
